@@ -1,6 +1,5 @@
 
 ## Prerequisites
-
 ```bash
 conda create -n tta python=3.8.1
 conda activate tta
@@ -9,7 +8,6 @@ conda install -y ipython pip
 # install the required packages
 pip install -r requirements.txt 
 ```
-
 ## Preparation
 
 ### Datasets
