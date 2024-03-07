@@ -1,0 +1,16 @@
+TEST:
+  BATCH_SIZE: 64
+
+
+INPUT:
+  SIZE: (32, 32)
+
+ADAPTER:
+  NAME: BN
+  BN:
+    MOMENTUM: 0.1
+    EPS: 1e-5
+    RESET_STATS: False
+    NO_STATS: False
+
+

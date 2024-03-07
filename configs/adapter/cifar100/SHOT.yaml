@@ -1,0 +1,12 @@
+TEST:
+  BATCH_SIZE: 64
+
+OPTIM:
+  METHOD: "SGD"
+  STEPS: 1
+  BETA: 0.9
+  LR: 1e-2
+  WD: 0.
+
+ADAPTER:
+  NAME: SHOT
