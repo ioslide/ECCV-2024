@@ -1,0 +1,140 @@
+from yacs.config import CfgNode as CN
+_C = CN()
+cfg = _C
+
+# ----------------------------- loader options -------------------------- #
+_C.LOADER = CN()
+
+_C.LOADER.SAMPLER = CN()
+_C.LOADER.SAMPLER.TYPE = "sequence"
+_C.LOADER.SAMPLER.GAMMA = 0.1
+
+_C.LOADER.NUM_WORKS = 4
+
+# --------------------------------- Contrastive options --------------------- #
+_C.CONTRAST = CN()
+
+# Temperature term for contrastive learning
+_C.CONTRAST.TEMPERATURE = 0.1
+
+# Output dimension of projector
+_C.CONTRAST.PROJECTION_DIM = 128
+
+# Contrastive mode
+_C.CONTRAST.MODE = 'all'
+_C.MODEL = CN()
+
+_C.MODEL.ARCH = 'Standard'
+
+_C.MODEL.EPISODIC = False
+
+_C.MODEL.PROJECTION = CN()
+
+_C.MODEL.PROJECTION.HEAD = "linear"
+_C.MODEL.PROJECTION.EMB_DIM = 2048
+_C.MODEL.PROJECTION.FEA_DIM = 128
+
+_C.CORRUPTION = CN()
+
+_C.CORRUPTION.DATASET = 'cifar10'
+_C.CORRUPTION.SOURCE = ''
+_C.CORRUPTION.TYPE = ['gaussian_noise', 'shot_noise', 'impulse_noise',
+                      'defocus_blur', 'glass_blur', 'motion_blur', 'zoom_blur',
+                      'snow', 'frost', 'fog', 'brightness', 'contrast',
+                      'elastic_transform', 'pixelate', 'jpeg_compression']
+_C.CORRUPTION.SEVERITY = [5]
+_C.CORRUPTION.NUM_EX = 10000
+_C.CORRUPTION.NUM_CLASS = -1
+_C.CORRUPTION.ORDER_NUM = 11
+
+_C.MODEL.ADAPTATION = 'source'
+_C.INPUT = CN()
+
+_C.INPUT.SIZE = (32, 32)
+
+_C.OPTIM = CN()
+_C.OPTIM.STEPS = 1
+_C.OPTIM.LR = 1e-3
+_C.OPTIM.METHOD = 'Adam'
+_C.OPTIM.BETA = 0.9
+_C.OPTIM.MOMENTUM = 0.9
+_C.OPTIM.WD = 0.0
+_C.OPTIM.EPS = 1e-5
+_C.OPTIM.DAMPENING = 0.0
+_C.OPTIM.NESTEROV = True
+
+_C.TEST = CN()
+_C.TEST.BATCH_SIZE = 64
+
+_C.GPU = 1
+_C.SEED = -1
+_C.OUTPUT_DIR = "./output"
+_C.DATA_DIR = "/home/cfyang/datasets/"
+_C.NOTE = 'none'
+_C.CKPT_DIR = "./models"
+_C.CKPT_PATH = "./models"
+_C.LOG_DIR = "./log"
+_C.bash_file_name = 'run.sh'
+_C.DEBUG = 0
+_C.ENABLE_PROGRESS_BAR = False
+_C.SETTING = ''
+
+_C.ADAPTER = CN()
+_C.ADAPTER.NAME = "PRDCL"
+
+_C.ADAPTER.BN = CN()
+_C.ADAPTER.BN.RESET_STATS = False
+_C.ADAPTER.BN.NO_STATS = False
+
+_C.ADAPTER.CoTTA = CN()
+_C.ADAPTER.CoTTA.RST = 0.01
+_C.ADAPTER.CoTTA.AP = 0.92
+_C.ADAPTER.CoTTA.MT = 0.999
+
+_C.ADAPTER.SHOT = CN()
+_C.ADAPTER.SHOT.beta_clustering_loss = 0.1
+
+_C.ADAPTER.PRDCL = CN()
+_C.ADAPTER.PRDCL.CONSISTENCY = 0.1
+_C.ADAPTER.PRDCL.CONSISTENCY2 = 0.1
+_C.ADAPTER.PRDCL.FISHER_ALPHA = 0.999
+
+
+_C.ADAPTER.RoTTA = CN()
+_C.ADAPTER.RoTTA.MEMORY_SIZE = 64
+_C.ADAPTER.RoTTA.UPDATE_FREQUENCY = 64
+_C.ADAPTER.RoTTA.NU = 0.001
+_C.ADAPTER.RoTTA.ALPHA = 0.05
+_C.ADAPTER.RoTTA.LAMBDA_T = 1.0
+_C.ADAPTER.RoTTA.LAMBDA_U = 1.0
+
+_C.ADAPTER.RMT = CN()
+_C.ADAPTER.RMT.LAMBDA_CE_SRC = 1.0
+_C.ADAPTER.RMT.LAMBDA_CE_TRG = 1.0
+_C.ADAPTER.RMT.LAMBDA_CONT = 1.0
+_C.ADAPTER.RMT.NUM_SAMPLES_WARM_UP = 50000
+_C.ADAPTER.RMT.CONTRAST_TEMPERATURE = 0.1
+_C.ADAPTER.RMT.CONTRAST_PROJECTION_DIM = 128
+_C.ADAPTER.RMT.CONTRAST_MODE = 'all'
+_C.ADAPTER.RMT.M_TEACHER_MOMENTUM = 0.999
+_C.ADAPTER.RMT.SOURCE_PERCENTAGE = 1.0
+
+_C.ADAPTER.GTTA = CN()
+_C.ADAPTER.GTTA.USE_STYLE_TRANSFER = True
+_C.ADAPTER.GTTA.STEPS_ADAIN = 1
+_C.ADAPTER.GTTA.PRETRAIN_STEPS_ADAIN = 20000
+_C.ADAPTER.GTTA.LAMBDA_CE_TRG = 0.1
+_C.ADAPTER.GTTA.SOURCE_PERCENTAGE = 1.0
+_C.ADAPTER.GTTA.LAMBDA_MIXUP = 1.0
+
+_C.ADAPTER.LAW = CN()
+_C.ADAPTER.LAW.TAU = 1.
+
+
+_C.ADAPTER.SAR = CN()
+
+_C.ADAPTER.Source = CN()
+
+_CFG_DEFAULT = _C.clone()
+_CFG_DEFAULT.freeze()
+
