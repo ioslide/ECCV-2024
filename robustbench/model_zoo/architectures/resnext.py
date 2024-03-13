@@ -28,7 +28,7 @@ https://github.com/google-research/augmix/blob/master/third_party/WideResNet_pyt
 """
 
 import math
-
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
@@ -124,6 +124,8 @@ class CifarResNeXt(nn.Module):
         self.avgpool = nn.AvgPool2d(8)
         self.classifier = nn.Linear(256 * block.expansion, num_classes)
         self.feats = None
+        self.feature_dim = 256 * block.expansion
+        
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -160,6 +162,41 @@ class CifarResNeXt(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def mixstyle(self, x):
+        alpha = 0.1
+        beta = torch.distributions.Beta(alpha, alpha)
+        B = x.size(0)
+        mu = x.mean(dim=[2, 3], keepdim=True)
+        var = x.var(dim=[2, 3], keepdim=True)
+        sig = (var + 1e-6).sqrt()
+        mu, sig = mu.detach(), sig.detach()
+        x_normed = (x - mu) / sig
+        lmda = beta.sample((B, 1, 1, 1))
+        lmda = lmda.to(x.device)
+        perm = torch.randperm(B)
+        mu2, sig2 = mu[perm], sig[perm]
+        mu_mix = mu * lmda + mu2 * (1 - lmda)
+        sig_mix = sig * lmda + sig2 * (1 - lmda)
+        return x_normed * sig_mix + mu_mix
+
+    # def _featurizer(self,x, mixstyle=False):
+    #     out = self.conv_1_3x3(x)
+    #     out = F.relu(self.bn_1(out), inplace=True)
+    #     out = self.stage_1(out)
+    #     out = self.stage_2(out)
+    #     out = self.stage_3(out)
+    #     if mixstyle:
+    #         out1 = self.mixstyle(out)
+
+    #     out = self.avgpool(out)
+    #     out = out.view(out.size(0), -1)
+    #     # out1 = self.stage_2(out1)
+    #     # out1 = self.stage_3(out1)
+    #     out1 = self.avgpool(out1)
+    #     out1 = out1.view(out1.size(0), -1)
+    #     return out,out1
+
+
     def _featurizer(self,x):
         out = self.conv_1_3x3(x)
         out = F.relu(self.bn_1(out), inplace=True)
@@ -167,12 +204,11 @@ class CifarResNeXt(nn.Module):
         out = self.stage_2(out)
         out = self.stage_3(out)
         out = self.avgpool(out)
-        feats = out.detach()
-        return feats
+        # self.feats = out.detach()
+        out = out.view(out.size(0), -1)
+        return out
 
-
-    def _classifier(self,feats):
-        out = feats.view(out.size(0), -1)
+    def _classifier(self,out):
         out = self.classifier(out)
         return out
 
@@ -185,10 +221,11 @@ class CifarResNeXt(nn.Module):
         out = self.stage_2(out)
         out = self.stage_3(out)
         out = self.avgpool(out)
-        self.feats = out.detach()
+        # self.feats = out.detach()
         out = out.view(out.size(0), -1)
         if return_feature:
             feature = out
+        self.feats = out.detach()
         out = self.classifier(out)
         if return_feature:
             if return_feature_only:

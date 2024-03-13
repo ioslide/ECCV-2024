@@ -1,10 +1,10 @@
 MODEL:
   ARCH: Standard
+  FEATURE_DIM: 640
   
 CORRUPTION:
   DATASET: cifar10
   NUM_CLASS: 10
-  NUM_EX: 10000
   SEVERITY:
     - 5
   TYPE:

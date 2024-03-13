@@ -90,7 +90,7 @@ def benchmark(
                               clean_y_test,
                               batch_size=batch_size,
                               device=device)
-    print(f'Clean accuracy: {accuracy:.2%}')
+    print(f'Clean accuracy: {accuracy}')
 
     extra_metrics = {}  # dict to store corruptions_mce for corruptions threat models
     if threat_model_ in {ThreatModel.Linf, ThreatModel.L2}:
@@ -134,7 +134,7 @@ def benchmark(
         extra_metrics['corruptions_mce'] = adv_mce
     else:
         raise NotImplementedError
-    print(f'Adversarial accuracy: {adv_accuracy:.2%}')
+    print(f'Adversarial accuracy: {adv_accuracy}')
 
     if to_disk:
         if model_name is None:

@@ -44,7 +44,7 @@ def configure_model(model, eps, momentum, reset_stats, no_stats):
 
 def setup(model, cfg):
     log.info("Setup TTA method: BN")
-    model = configure_model(model,cfg.OPTIM.EPS, cfg.OPTIM.MOMENTUM,cfg.BN.RESET_STATS,cfg.BN.NO_STATS)
+    model = configure_model(model,cfg.ADAPTER.BN.EPS, cfg.OPTIM.MOMENTUM,cfg.BN.RESET_STATS,cfg.BN.NO_STATS)
     model = BN_model(
         model, 
         steps=int(cfg.OPTIM.STEPS),

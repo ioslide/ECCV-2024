@@ -1,10 +1,10 @@
 MODEL:
   ARCH: Hendrycks2020AugMix_ResNeXt
+  FEATURE_DIM: 1024
 
 CORRUPTION:
   DATASET: cifar100
   NUM_CLASS: 100
-  NUM_EX: 10000
   SEVERITY:
     - 5
   TYPE:

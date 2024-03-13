@@ -259,6 +259,7 @@ def load_imagenetc(
 
     data_folder_path = Path(data_dir) / CORRUPTIONS_DIR_NAMES[
         BenchmarkDataset.imagenet][ThreatModel.corruptions] / corruptions[0] / str(severity)
+        
     imagenet = CustomImageFolder(
         data_folder_path, 
         prepr,
@@ -282,12 +283,13 @@ def load_imagenet3dcc(
     data_dir: str = './data',
     shuffle: bool = False,
     corruptions: Sequence[str] = CORRUPTIONS_3DCC,
-    prepr: Callable = PREPROCESSINGS[None]
+    prepr: Callable = PREPROCESSINGS[None],
+    setting: str = 'continual'
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     if n_examples > 5000:
-        # raise ValueError(
-        #     'The evaluation is currently possible on at most 5000 points.')
         log.info('The evaluation is currently possible on at most 5000 points.')
+        raise ValueError(
+            'The evaluation is currently possible on at most 5000 points.')
 
     assert len(
         corruptions
@@ -298,7 +300,11 @@ def load_imagenet3dcc(
 
     data_folder_path = Path(data_dir) / CORRUPTIONS_DIR_NAMES[
         BenchmarkDataset.imagenet][ThreatModel.corruptions_3d] / corruptions[0] / str(severity)
-    imagenet = CustomImageFolder(data_folder_path, prepr)
+    imagenet = CustomImageFolder(
+        data_folder_path, 
+        prepr,
+        setting=setting
+    )
     test_loader = data.DataLoader(imagenet,
                                   batch_size=n_examples,
                                   shuffle=shuffle,

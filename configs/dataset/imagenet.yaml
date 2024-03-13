@@ -1,5 +1,6 @@
 MODEL:
   ARCH: resnet50
+  FEATURE_DIM: 2048
 
 
 CORRUPTION:

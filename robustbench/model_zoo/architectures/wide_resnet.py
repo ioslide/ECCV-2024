@@ -72,7 +72,10 @@ class WideResNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.fc = nn.Linear(nChannels[3], num_classes, bias=bias_last)
         self.nChannels = nChannels[3]
+        self.feature_dim = nChannels[3]
+        self.num_classes = num_classes
         self.feats = None
+        self.eps = 1e-6
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -84,31 +87,83 @@ class WideResNet(nn.Module):
             elif isinstance(m, nn.Linear) and not m.bias is None:
                 m.bias.data.zero_()
 
+    def mixstyle(self, x):
+        alpha = 0.1
+        beta = torch.distributions.Beta(alpha, alpha)
+        B = x.size(0)
+        mu = x.mean(dim=[2, 3], keepdim=True)
+        var = x.var(dim=[2, 3], keepdim=True)
+        sig = (var + 1e-6).sqrt()
+        mu, sig = mu.detach(), sig.detach()
+        x_normed = (x - mu) / sig
+        lmda = beta.sample((B, 1, 1, 1))
+        lmda = lmda.to(x.device)
+        perm = torch.randperm(B)
+        mu2, sig2 = mu[perm], sig[perm]
+        mu_mix = mu * lmda + mu2 * (1 - lmda)
+        sig_mix = sig * lmda + sig2 * (1 - lmda)
+        return x_normed * sig_mix + mu_mix
+
     def _featurizer(self,x):
         out = self.conv1(x)
         out = self.block1(out)
         out = self.block2(out)
         out = self.block3(out)
         out = self.relu(self.bn1(out))
-        feats = F.avg_pool2d(out, 8)
-        return feats
-
-    def _classifier(self,feats):
-        out = feats.view(-1, self.nChannels)
-        out = self.fc(out)
+        out = F.avg_pool2d(out, 8)
+        out = out.view(-1, self.nChannels)
         return out
 
+    # def _featurizer(self,x, mixstyle=False):
+    #     out = self.conv1(x)
+    #     out = self.block1(out)
+    #     if mixstyle:
+    #         out1 = self.mixstyle(out)
+    #     out = self.block2(out)
+    #     out = self.block3(out)
+    #     out = self.relu(self.bn1(out))
+    #     out = F.avg_pool2d(out, 8)
+    #     out = out.view(-1, self.nChannels)
+
+    #     out1 = self.block2(out1)
+    #     out1 = self.block3(out1)
+    #     out1 = self.relu(self.bn1(out1))
+    #     out1 = F.avg_pool2d(out1, 8)
+    #     out1 = out1.view(-1, self.nChannels)
+
+    #     return out,out1
+
+    def _classifier(self,x):
+        x = self.fc(x)
+        return x
+
+    def mixstyle(self, x):
+        alpha = 0.1
+        beta = torch.distributions.Beta(alpha, alpha)
+        B = x.size(0)
+        mu = x.mean(dim=[2, 3], keepdim=True)
+        var = x.var(dim=[2, 3], keepdim=True)
+        sig = (var + self.eps).sqrt()
+        mu, sig = mu.detach(), sig.detach()
+        x_normed = (x - mu) / sig
+        lmda = beta.sample((B, 1, 1, 1))
+        lmda = lmda.to(x.device)
+        perm = torch.randperm(B)
+        mu2, sig2 = mu[perm], sig[perm]
+        mu_mix = mu * lmda + mu2 * (1 - lmda)
+        sig_mix = sig * lmda + sig2 * (1 - lmda)
+        return x_normed * sig_mix + mu_mix
 
 
-    def forward(self, x, return_feature=False, return_feature_only=False):
+    def forward(self, x, return_feature=False, return_feature_only=False, mixstyle=False):
         out = self.conv1(x)
         out = self.block1(out)
         out = self.block2(out)
         out = self.block3(out)
         out = self.relu(self.bn1(out))
         out = F.avg_pool2d(out, 8)
-        self.feats = out.detach()
         out = out.view(-1, self.nChannels)
+        self.feats = out.detach()
         if return_feature:
             feature = out
         out = self.fc(out)
