@@ -10,6 +10,31 @@ from glob import glob
 from typing import Optional, Sequence
 from robustbench.data import CORRUPTIONS, PREPROCESSINGS, load_cifar10c, load_cifar100c
 from robustbench.loaders import CustomImageFolder, CustomCifarDataset
+import torchvision.transforms as transforms
+def get_transform(dataset_name, adaptation):
+    """
+    Get transformation pipeline
+    Note that the data normalization is done inside of the model
+    :param dataset_name: Name of the dataset
+    :param adaptation: Name of the adaptation method
+    :return: transforms
+    """
+
+    # create non-method specific transformation
+    if dataset_name in {"cifar10", "cifar100"}:
+        transform = transforms.Compose([transforms.ToTensor()])
+    elif dataset_name in {"cifar10_c", "cifar100_c"}:
+        transform = None
+    elif dataset_name == "imagenet_c":
+        # note that ImageNet-C is already resized and centre cropped
+        transform = transforms.Compose([transforms.ToTensor()])
+    else:
+        # use classical ImageNet transformation procedure
+        transform = transforms.Compose([transforms.Resize(256),
+                                        transforms.CenterCrop(224),
+                                        transforms.ToTensor()])
+
+    return transform
 
 
 def create_cifarc_dataset(
